@@ -357,3 +357,105 @@ def teaching_card(verb: Verb, tense: str) -> list[str]:
     if verb.stem_change:
         lines.append(f"   note: {verb.stem_change}")
     return lines
+
+
+# --------------------------------------------------------------------------
+# Usage examples — the context dimension, shown when an answer goes wrong
+# --------------------------------------------------------------------------
+#
+# Keyed by Spanish headword. Deliberately short and ordinary: a word met in a
+# sentence is remembered better than a word met alone, and a sentence you can
+# picture beats a clever one. Phrases are omitted — they are already sentences.
+
+USES: dict[str, tuple[str, str]] = {
+    "yo": ("Yo hablo español.", "I speak Spanish."),
+    "tú": ("¿Tú vienes también?", "Are you coming too?"),
+    "él": ("Él es mi hermano.", "He is my brother."),
+    "ella": ("Ella trabaja aquí.", "She works here."),
+    "nosotros": ("Nosotros vivimos en Madrid.", "We live in Madrid."),
+    "ellos": ("Ellos no entienden.", "They don't understand."),
+    "hombre": ("Ese hombre es mi vecino.", "That man is my neighbour."),
+    "mujer": ("La mujer del sombrero.", "The woman with the hat."),
+    "amigo": ("Es un amigo del trabajo.", "He's a friend from work."),
+    "niño": ("El niño tiene hambre.", "The child is hungry."),
+    "familia": ("Toda la familia come junta.", "The whole family eats together."),
+    "vecino": ("Mi vecino tiene un perro.", "My neighbour has a dog."),
+    "agua": ("Quiero un vaso de agua.", "I want a glass of water."),
+    "pan": ("Compro pan cada mañana.", "I buy bread every morning."),
+    "comida": ("La comida está lista.", "The food is ready."),
+    "casa": ("Estoy en casa.", "I'm at home."),
+    "ciudad": ("Vivo en una ciudad grande.", "I live in a big city."),
+    "calle": ("Cruzamos la calle.", "We cross the street."),
+    "trabajo": ("Voy al trabajo a las ocho.", "I go to work at eight."),
+    "día": ("Hace un día bonito.", "It's a lovely day."),
+    "noche": ("Trabajo por la noche.", "I work at night."),
+    "tiempo": ("No tengo tiempo.", "I don't have time."),
+    "dinero": ("No llevo dinero encima.", "I'm not carrying any money."),
+    "libro": ("Estoy leyendo un libro.", "I'm reading a book."),
+    "puerta": ("Cierra la puerta, por favor.", "Close the door, please."),
+    "palabra": ("No entiendo esa palabra.", "I don't understand that word."),
+    "pregunta": ("Tengo una pregunta.", "I have a question."),
+    "error": ("Fue un error mío.", "It was my mistake."),
+    "bueno": ("Es un buen libro.", "It's a good book."),
+    "malo": ("Tuve un día malo.", "I had a bad day."),
+    "grande": ("Viven en una casa grande.", "They live in a big house."),
+    "pequeño": ("Es un problema pequeño.", "It's a small problem."),
+    "nuevo": ("Tengo un coche nuevo.", "I have a new car."),
+    "viejo": ("Ese edificio es muy viejo.", "That building is very old."),
+    "caliente": ("El café está caliente.", "The coffee is hot."),
+    "frío": ("Hace frío hoy.", "It's cold today."),
+    "fácil": ("El examen fue fácil.", "The exam was easy."),
+    "difícil": ("Es difícil de explicar.", "It's hard to explain."),
+    "cansado": ("Estoy cansado.", "I'm tired."),
+    "feliz": ("Estoy feliz de verte.", "I'm happy to see you."),
+    "pero": ("Quiero ir, pero no puedo.", "I want to go, but I can't."),
+    "porque": ("No fui porque llovía.", "I didn't go because it was raining."),
+    "también": ("Yo también quiero.", "I want some too."),
+    "siempre": ("Siempre llega tarde.", "He always arrives late."),
+    "nunca": ("Nunca he estado allí.", "I have never been there."),
+    "ahora": ("Ahora no puedo hablar.", "I can't talk right now."),
+    "después": ("Hablamos después.", "We'll talk later."),
+    "hoy": ("Hoy es lunes.", "Today is Monday."),
+    "mañana": ("Nos vemos mañana.", "See you tomorrow."),
+    "ayer": ("Ayer comí en casa.", "Yesterday I ate at home."),
+    "aquí": ("Ven aquí.", "Come here."),
+    "allí": ("El libro está allí.", "The book is over there."),
+    "con": ("Voy con mis amigos.", "I'm going with my friends."),
+    "sin": ("Café sin azúcar.", "Coffee without sugar."),
+    "muy": ("Está muy lejos.", "It's very far away."),
+    "casi": ("Casi me caigo.", "I almost fell."),
+    "todavía": ("Todavía no está listo.", "It isn't ready yet."),
+    "aunque": ("Iré aunque llueva.", "I'll go even if it rains."),
+    "azúcar": ("Un café con azúcar.", "A coffee with sugar."),
+    "aceite": ("Aceite de oliva.", "Olive oil."),
+    "almohada": ("Necesito otra almohada.", "I need another pillow."),
+    "alfombra": ("La alfombra es roja.", "The rug is red."),
+    "ojalá": ("Ojalá tengas razón.", "I hope you're right."),
+}
+
+# Verbs get their paradigm instead, but a sentence still helps the meaning land.
+VERB_USES: dict[str, tuple[str, str]] = {
+    "ser": ("Soy de Islandia.", "I'm from Iceland."),
+    "estar": ("Estoy en la oficina.", "I'm at the office."),
+    "tener": ("Tengo dos hermanas.", "I have two sisters."),
+    "ir": ("Vamos a la playa.", "We're going to the beach."),
+    "hacer": ("¿Qué haces?", "What are you doing?"),
+    "querer": ("Quiero aprender español.", "I want to learn Spanish."),
+    "poder": ("No puedo ahora.", "I can't right now."),
+    "decir": ("¿Qué dijiste?", "What did you say?"),
+    "saber": ("No sé.", "I don't know."),
+    "ver": ("No veo nada.", "I can't see anything."),
+    "hablar": ("Hablo un poco de español.", "I speak a little Spanish."),
+    "comer": ("Comemos a las dos.", "We eat at two."),
+    "vivir": ("Vivo aquí desde 2019.", "I've lived here since 2019."),
+    "trabajar": ("Trabajo desde casa.", "I work from home."),
+    "aprender": ("Aprendo rápido.", "I learn fast."),
+    "escribir": ("Le escribo a mi madre.", "I write to my mother."),
+    "necesitar": ("Necesito ayuda.", "I need help."),
+    "entender": ("No entiendo.", "I don't understand."),
+}
+
+
+def usage(key: str) -> tuple[str, str] | None:
+    """The example sentence for a headword, if we have one."""
+    return USES.get(key) or VERB_USES.get(key)

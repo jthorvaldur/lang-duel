@@ -97,6 +97,30 @@ Near-misses (one or two characters — a dropped accent, a typo) score as
 `close`: partial XP, no streak break, no loss on the card. Winning with a hint
 also scores `close`, so the stats stay honest.
 
+**Every wrong answer buys the whole item.** A miss is when attention is highest,
+so that is when the app spends content. It assembles a card from every dimension
+the item has — the pair restated, an example sentence, the ancestor and its
+English cousins, the family the word belongs to, and the sound law it
+demonstrates if you have met it:
+
+```
+┌─ remember it ──────────────────────────────────────────────────────┐
+│ ahora   =   now                                                    │
+│                                                                    │
+│   Ahora no puedo hablar.                                           │
+│   I can't talk right now.                                          │
+│                                                                    │
+│ Latin hac hora, at this hour                                       │
+│ english cousins: hour, horoscope                                   │
+│                                                                    │
+│ glue: pero, porque, también, siempre, nunca, después               │
+└────────────────────────────────────────────────────────────────────┘
+```
+
+Nothing is invented to pad it out — an item with two dimensions shows two. The
+card appears regardless of which stage you are at, because an error is the one
+moment worth interrupting for.
+
 ## Modes
 
 The app opens small and grows. A new player gets word pairs and nothing else;

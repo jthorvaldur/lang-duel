@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import random
+import re
 import sys
 from pathlib import Path
 
@@ -221,6 +222,72 @@ class App:
         if q.expansion:
             self.body.extend(panel("conjugation", q.expansion, ui.width()))
 
+    def remember_card(self, q: Question) -> None:
+        """Everything we know about the item, assembled after a wrong answer.
+
+        A miss is the moment attention is highest, so it is the moment to spend
+        content. Whatever dimensions the item has — the pair, a sentence, the
+        ancestor, the English cousins, the family it belongs to, the sound law it
+        demonstrates — go in. Nothing is invented to fill the card: an item with
+        only two dimensions shows two.
+        """
+        w = ui.width()
+        es = q.origin_key or (q.canonical if q.target_lang == "es" else q.prompt)
+        rows: list[str] = []
+
+        # 1. the pair, restated together and unmissable
+        if q.kind == "word":
+            src = q.prompt if q.target_lang == "es" else q.canonical
+            dst = q.canonical if q.target_lang == "es" else q.prompt
+            rows.append(f"{orange(bold(dst))}   {dim('=')}   {blue(bold(src))}")
+            alts = [a for a in q.accepted[1:] if a.lower() != q.canonical.lower()][:3]
+            if alts:
+                rows.append(dim("also: " + ", ".join(alts)))
+        else:
+            # Verbs: pull the two sides out of the prompt's decoration so the
+            # line reads "tuvo = he had", not "tuvo = \"he had\" → tener".
+            quoted = re.search(r'"([^"]+)"', q.prompt)
+            other = quoted.group(1) if quoted else q.prompt
+            es_form = q.canonical if q.target_lang == "es" else other
+            en_form = other if q.target_lang == "es" else q.canonical
+            rows.append(f"{orange(bold(es_form))}   {dim('=')}   {blue(bold(en_form))}")
+            if q.origin_key:
+                rows.append(dim(f"{q.origin_key} · {q.hint}"))
+
+        # 2. a sentence — context is the cheapest memory hook there is
+        key = q.origin_key or es
+        use = content.usage(key) or content.usage(
+            next((wd.es for wd in content.WORDS
+                  if q.canonical in (wd.es, wd.en) or q.prompt in (wd.es, wd.en)), ""))
+        if use:
+            rows += ["", "  " + orange(use[0]), "  " + dim(use[1])]
+
+        # 3. ancestry, whether or not the lineage stage is on
+        o = q.origin
+        if o is not None:
+            rows.append("")
+            rows += wrap(o.root, w - 8)
+            if o.cousins and not o.cousins.startswith("none"):
+                rows += wrap(f"english cousins: {o.cousins}", w - 8)
+
+        # 4. the family it sits in
+        if q.kind == "word":
+            word = next((wd for wd in content.WORDS if wd.es == es), None)
+            if word and word.tag not in ("phrase",):
+                siblings = [x.es for x in content.WORDS
+                            if x.tag == word.tag and x.es != word.es][:6]
+                if siblings:
+                    rows.append("")
+                    rows.append(dim(f"{word.tag}: ") + dim(", ".join(siblings)))
+
+        # 5. the rule it demonstrates, if the player has met it
+        if o is not None and o.pattern in self.p.patterns_seen:
+            pat = lineage.PATTERNS_BY_ID[o.pattern]
+            rows.append("")
+            rows.append(violet("rule: ") + dim(pat.title))
+
+        self.body.extend(panel("remember it", rows, w, colour=red))
+
     def face_card(self, q: Question) -> None:
         """The unjudged ancestor face. Shown, never graded, never scored."""
         faces = latin_face(q)
@@ -289,6 +356,7 @@ class App:
         self.n += 1
         self.body = []
         used_hint = False
+        missed = False
         stage_before = self.p.stage()
 
         while True:
@@ -321,6 +389,7 @@ class App:
             if low in (":skip", ":next"):
                 self.body.append(f"  {dim('skipped →')} {bold(q.canonical)}")
                 self.p.record(q, "miss")
+                missed = True
                 break
             if low in (":help", "?"):
                 self.screen(self.help_lines(ui.width()))
@@ -348,9 +417,12 @@ class App:
                 extra = dim("    also ok: " + ", ".join(alts)) if alts else ""
                 self.body.append(f"  {red('✘ ' + self.rng.choice(CONSOLE))}  answer: "
                                  f"{bold(q.canonical)}{extra}")
+                missed = True
             break
 
         self.body.append("")
+        if missed and q.kind != "aiid":  # every error buys you the full item
+            self.remember_card(q)
         if q.why:                       # safety drills explain themselves either way
             self.body.extend(panel("why", wrap(q.why, ui.width() - 8), ui.width(),
                                    colour=violet))
