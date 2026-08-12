@@ -12,61 +12,50 @@ import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import content, lineage
+from . import aiid, content, judges, lineage
 from .content import VERBS, WORDS, Verb, Word
+from .judges import Verdict, edit_distance, fold  # re-exported for callers
 
 DEFAULT_PROFILE = Path.home() / ".langduel.json"
+
+# Bump when the saved shape changes. A profile written by a different app —
+# mirror/duelo.py shares nine key names with this one — must never be loaded
+# and silently rewritten with its unknown fields dropped.
+SCHEMA = "langduel/2"
 
 # How many clean hits in ONE direction before that direction counts as solid.
 SOLID_HITS = 2
 # A word is "understood" (scorecard counter) once both directions are solid.
 DIRECTIONS = ("en", "es")
 
+# Domains supply items and name their own production poles. Language happens to
+# have two poles that are languages; the aiid domain's poles are spot / act.
+DOMAINS = {"es": ("en", "es"), "aiid": aiid.POLES}
+ALL_POLES = tuple(pole for poles in DOMAINS.values() for pole in poles)
+
+
+class ForeignProfile(Exception):
+    """Raised when a save file was written by something that is not this app."""
+
+
+# Progressive disclosure. A new player gets word pairs and nothing else; the
+# rest of the app arrives as they earn it, so the first screen stays small.
+STAGES: tuple[tuple[str, int, str], ...] = (
+    ("words",   0,  "word pairs, both directions"),
+    ("verbs",   6,  "+ verbs in the present tense"),
+    ("lineage", 14, "+ where the words come from, and the sound laws"),
+    ("tenses",  24, "+ the past tenses, and the harder vocabulary"),
+    ("latin",   40, "+ the Latin ancestor shown on every card it applies to"),
+)
+
 
 # --------------------------------------------------------------------------
-# Answer normalisation & grading
+# Grading — see judges.py for the implementations
 # --------------------------------------------------------------------------
-
-_STRIP_LEAD = ("the ", "a ", "an ", "to ", "el ", "la ", "los ", "las ", "un ", "una ")
-
-
-def fold(text: str) -> str:
-    """Lowercase, strip accents/punctuation/articles — so typing 'como estas' passes."""
-    t = unicodedata.normalize("NFD", text.lower().strip())
-    t = "".join(c for c in t if unicodedata.category(c) != "Mn")
-    t = "".join(c if c.isalnum() or c.isspace() else " " for c in t)
-    t = " ".join(t.split())
-    for lead in _STRIP_LEAD:
-        if t.startswith(lead):
-            t = t[len(lead):]
-            break
-    return t
-
-
-def edit_distance(a: str, b: str) -> int:
-    if a == b:
-        return 0
-    prev = list(range(len(b) + 1))
-    for i, ca in enumerate(a, 1):
-        cur = [i]
-        for j, cb in enumerate(b, 1):
-            cur.append(min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (ca != cb)))
-        prev = cur
-    return prev[-1]
-
 
 def grade(answer: str, accepted: tuple[str, ...]) -> str:
-    """Return 'hit', 'close' (typo / accent slip), or 'miss'."""
-    given = fold(answer)
-    if not given:
-        return "miss"
-    folded = [fold(a) for a in accepted]
-    if given in folded:
-        return "hit"
-    tolerance = 1 if len(given) <= 6 else 2
-    if any(edit_distance(given, f) <= tolerance for f in folded):
-        return "close"
-    return "miss"
+    """The original grader, kept as a shorthand for the tolerant judge."""
+    return judges.tolerant(answer, accepted).result
 
 
 # --------------------------------------------------------------------------
@@ -78,13 +67,21 @@ def grade(answer: str, accepted: tuple[str, ...]) -> str:
 class Question:
     key: str  # stable item id, e.g. "w:water" or "v:tener:present:1"
     kind: str  # "word" | "verb"
-    target_lang: str  # the language the player must PRODUCE
+    target_lang: str  # the production pole: "en"/"es", or "spot"/"act"
     prompt: str  # what we show
     hint: str  # tag / tense label shown under the prompt
     accepted: tuple[str, ...]
     canonical: str  # the answer we print when they miss
     expansion: list[str] = field(default_factory=list)  # teaching card, verbs only
     origin_key: str = ""  # index into lineage.ORIGINS, "" when we have nothing
+    domain: str = "es"
+    judge: str = "tolerant"
+    options: tuple[str, ...] = ()   # choice questions only
+    faces: dict[str, str] = field(default_factory=dict)  # display-only, never graded
+    why: str = ""                   # explanation shown after answering
+
+    def decide(self, answer: str) -> Verdict:
+        return judges.BY_NAME[self.judge](answer, self.accepted, self.options)
 
     @property
     def origin(self) -> "lineage.Origin | None":
@@ -137,6 +134,32 @@ def verb_question(v: Verb, tense: str, person: int, target_lang: str) -> Questio
     )
 
 
+def aiid_question(idx: int, d: aiid.Drill) -> Question:
+    """A pick-one safety drill. Graded by choice, explained either way."""
+    return Question(
+        key=f"a:{d.pole}:{idx}",
+        kind="aiid",
+        target_lang=d.pole,
+        prompt=d.prompt,
+        hint=aiid.POLE_LABEL[d.pole] + (f" · {d.tag}" if d.tag else ""),
+        accepted=(d.answer,),
+        canonical=d.answer,
+        domain="aiid",
+        judge="choice",
+        options=d.options,
+        why=d.why,
+    )
+
+
+def latin_face(q: Question) -> dict[str, str]:
+    """The unjudged third face: the ancestor both sides descend from."""
+    o = q.origin
+    if o is None:
+        return {}
+    lang, head = o.ancestor()
+    return {lang.lower(): head} if head else {}
+
+
 # --------------------------------------------------------------------------
 # Profile / scorecard
 # --------------------------------------------------------------------------
@@ -155,14 +178,18 @@ class Profile:
     started: float = field(default_factory=time.time)
     # item key -> {"en": hits, "es": hits, "miss": total misses}
     items: dict[str, dict[str, int]] = field(default_factory=dict)
-    # production language -> [attempts, hits]
-    lang_record: dict[str, list[int]] = field(
-        default_factory=lambda: {"en": [0, 0], "es": [0, 0]}
+    # production pole -> [attempts, hits]. Language is one axis among several.
+    axis_record: dict[str, list[int]] = field(
+        default_factory=lambda: {pole: [0, 0] for pole in ALL_POLES}
     )
+    schema: str = SCHEMA
     unlocked_level: int = 1
     # Lineage entries and sound-law patterns the player has been shown.
     discovered: list[str] = field(default_factory=list)
     patterns_seen: list[str] = field(default_factory=list)
+    # Runtime only, never saved: pins the app to an earlier stage so the
+    # stripped-back early game stays playable at any level of progress.
+    cap: int | None = None
 
     # -- persistence ------------------------------------------------------
     @classmethod
@@ -174,31 +201,75 @@ class Profile:
         except (json.JSONDecodeError, OSError):
             return cls(path=path)
         raw.pop("path", None)
-        known = {f for f in cls.__dataclass_fields__ if f != "path"}
-        return cls(path=path, **{k: v for k, v in raw.items() if k in known})
+
+        found = raw.get("schema")
+        if found is None and "ladder_progress" in raw:
+            # mirror/duelo.py's shape: nine key names in common, different meaning.
+            raise ForeignProfile(
+                f"{path} was written by another app (duelo). Refusing to load it — "
+                "saving would drop its fields. Use --profile to pick a different file."
+            )
+        if found not in (None, SCHEMA):
+            raise ForeignProfile(f"{path} has schema {found!r}, this app writes {SCHEMA!r}.")
+
+        # v1 → v2: the language record became a general axis record.
+        if "lang_record" in raw and "axis_record" not in raw:
+            raw["axis_record"] = raw.pop("lang_record")
+        raw["schema"] = SCHEMA
+
+        known = {f for f in cls.__dataclass_fields__ if f not in ("path", "cap")}
+        p = cls(path=path, **{k: v for k, v in raw.items() if k in known})
+        for pole in ALL_POLES:                       # new poles start empty
+            p.axis_record.setdefault(pole, [0, 0])
+        return p
 
     def save(self) -> None:
-        data = {k: v for k, v in self.__dict__.items() if k != "path"}
+        data = {k: v for k, v in self.__dict__.items() if k not in ("path", "cap")}
         try:
             self.path.write_text(json.dumps(data, indent=2, ensure_ascii=False))
         except OSError:
             pass  # a read-only home should never cost you a game
 
     # -- derived stats ----------------------------------------------------
-    def accuracy(self, lang: str) -> float:
-        attempts, hits = self.lang_record[lang]
-        # Unseen languages start at a neutral 0.5 so neither is starved early.
+    def accuracy(self, pole: str) -> float:
+        attempts, hits = self.axis_record.get(pole, [0, 0])
+        # Unseen poles start at a neutral 0.5 so neither is starved early.
         return hits / attempts if attempts >= 3 else 0.5
 
+    def weakest(self, domain: str = "es") -> str:
+        return min(DOMAINS[domain], key=self.accuracy)
+
     def weakest_lang(self) -> str:
-        return min(DIRECTIONS, key=self.accuracy)
+        return self.weakest("es")
+
+    def pole_bias(self, domain: str = "es") -> float:
+        """P(next question uses the SECOND pole). Density follows the weaker side."""
+        a, b = DOMAINS[domain]
+        # Error mass per side, floored so the strong side never disappears.
+        err_a, err_b = max(1 - self.accuracy(a), 0.12), max(1 - self.accuracy(b), 0.12)
+        return min(0.85, max(0.15, err_b / (err_a + err_b)))
 
     def es_bias(self) -> float:
-        """P(next question demands Spanish). Density follows the weaker side."""
-        en_acc, es_acc = self.accuracy("en"), self.accuracy("es")
-        # Error mass per side, floored so the strong side never disappears.
-        en_err, es_err = max(1 - en_acc, 0.12), max(1 - es_acc, 0.12)
-        return min(0.85, max(0.15, es_err / (en_err + es_err)))
+        return self.pole_bias("es")
+
+    # -- progressive disclosure -------------------------------------------
+    def stage(self) -> int:
+        """How much of the app is switched on, from the mastery already earned."""
+        earned = self.understood() + self.verbs_drilled()
+        reached = max(i for i, (_, need, _) in enumerate(STAGES) if earned >= need)
+        return reached if self.cap is None else min(reached, self.cap)
+
+    def stage_name(self) -> str:
+        return STAGES[self.stage()][0]
+
+    def has(self, feature: str) -> bool:
+        return self.stage() >= [s[0] for s in STAGES].index(feature)
+
+    def next_unlock(self) -> tuple[str, int] | None:
+        earned = self.understood() + self.verbs_drilled()
+        for name, need, blurb in STAGES[self.stage() + 1:]:
+            return blurb, need - earned
+        return None
 
     def understood(self) -> int:
         """Words solid in BOTH directions — the 'agreed understood' counter."""
@@ -231,8 +302,8 @@ class Profile:
         """Update the scorecard. Returns XP earned for this answer."""
         self.rounds += 1
         rec = self.items.setdefault(q.key, {"en": 0, "es": 0, "miss": 0})
-        attempts, hits = self.lang_record[q.target_lang]
-        self.lang_record[q.target_lang] = [attempts + 1, hits + (result == "hit")]
+        attempts, hits = self.axis_record.setdefault(q.target_lang, [0, 0])
+        self.axis_record[q.target_lang] = [attempts + 1, hits + (result == "hit")]
 
         if result == "hit":
             self.wins += 1
@@ -262,13 +333,23 @@ class Profile:
 
 
 class Selector:
-    """Picks the next question: weak language first, then weak items."""
+    """Picks the next question: weak domain pole first, then weak items.
+
+    The two-level draw is the point. The outer draw is the production pole, so
+    the app keeps asking for whatever you are worse at *producing*; the inner
+    draw is the item, weighted by your history with it. Anything added later —
+    spaced repetition, new domains — belongs in the inner weight, not as a
+    replacement for the outer draw, or the density mechanic quietly dies.
+    """
 
     def __init__(self, profile: Profile, rng: random.Random | None = None,
-                 verb_share: float = 0.4) -> None:
+                 verb_share: float = 0.4, domains: tuple[str, ...] = ("es",),
+                 aiid_share: float = 0.25) -> None:
         self.p = profile
         self.rng = rng or random.Random()
         self.verb_share = verb_share
+        self.domains = domains
+        self.aiid_share = aiid_share
         self._recent: list[str] = []
 
     def _weight(self, key: str, lang: str, base: float) -> float:
@@ -283,18 +364,34 @@ class Selector:
         return max(w, 0.05)
 
     def next(self) -> Question:
-        lang = "es" if self.rng.random() < self.p.es_bias() else "en"
+        domain = "es"
+        if "aiid" in self.domains and (
+                self.domains == ("aiid",) or self.rng.random() < self.aiid_share):
+            domain = "aiid"
+        poles = DOMAINS[domain]
+        pole = poles[1] if self.rng.random() < self.p.pole_bias(domain) else poles[0]
+
         for _ in range(8):  # avoid immediate repeats without looping forever
-            q = self._pick(lang)
-            if q.key not in self._recent[-5:]:
+            q = self._pick(domain, pole)
+            if q.key not in self._recent[-6:]:
                 break
         self._recent.append(q.key)
         return q
 
-    def _pick(self, lang: str) -> Question:
-        if self.rng.random() < self.verb_share:
-            return self._pick_verb(lang)
-        return self._pick_word(lang)
+    def _pick(self, domain: str, pole: str) -> Question:
+        if domain == "aiid":
+            return self._pick_aiid(pole)
+        # Verbs stay locked until the player has earned them.
+        if self.p.has("verbs") and self.rng.random() < self.verb_share:
+            return self._pick_verb(pole)
+        return self._pick_word(pole)
+
+    def _pick_aiid(self, pole: str) -> Question:
+        pool = [(i, d) for i, d in enumerate(aiid.DRILLS)
+                if d.pole == pole and d.level <= self.p.unlocked_level + 1]
+        weights = [self._weight(f"a:{d.pole}:{i}", pole, 1.0) for i, d in pool]
+        i, d = self.rng.choices(pool, weights=weights, k=1)[0]
+        return aiid_question(i, d)
 
     def _pick_word(self, lang: str) -> Question:
         pool = [w for w in WORDS if w.level <= self.p.unlocked_level]
@@ -304,7 +401,7 @@ class Selector:
 
     def _pick_verb(self, lang: str) -> Question:
         pool = [v for v in VERBS if v.level <= self.p.unlocked_level]
-        tenses = ("present",) if self.p.unlocked_level == 1 else content.TENSES
+        tenses = content.TENSES if self.p.has("tenses") else ("present",)
         cands: list[tuple[Verb, str, int]] = [
             (v, t, i) for v in pool for t in tenses for i in range(6)
             if not (i == 4 and self.rng.random() < 0.7)  # vosotros: rare on purpose

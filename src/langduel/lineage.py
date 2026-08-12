@@ -26,6 +26,21 @@ class Origin:
     hook: str = ""     # the line that makes it stick
     pattern: str = ""  # id of the PATTERNS entry this word demonstrates
 
+    def ancestor(self) -> tuple[str, str]:
+        """(language, headword) pulled off the front of `root`, or ("", "").
+
+        The third face of a card — shown, never graded. Deliberately
+        conservative: anything it cannot parse cleanly it declines to show,
+        because a wrong ancestor is worse than none.
+        """
+        for lang in ("Latin", "Late Latin", "Vulgar Latin", "Arabic", "Greek"):
+            for prefix in (lang + " ", lang.lower() + " "):
+                if self.root.startswith(prefix):
+                    head = self.root[len(prefix):].split(",")[0].strip()
+                    if head and len(head.split()) <= 3 and head[0].islower():
+                        return lang, head
+        return "", ""
+
 
 ORIGINS: dict[str, Origin] = {
     # --- nouns ------------------------------------------------------------
