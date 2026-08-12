@@ -1,0 +1,9 @@
+#!/usr/bin/env python3
+"""Launcher: ./play  (no install, no dependencies)."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+from langduel.cli import main  # noqa: E402
+
+raise SystemExit(main(sys.argv[1:]))
