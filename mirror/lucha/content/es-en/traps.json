@@ -218,5 +218,16 @@
     "correct": 0,
     "why": "the clock time sets the scene (imperfect); what happened → preterite.",
     "tier": 3
+  },
+  {
+    "pair": "por o para",
+    "text": "Este regalo es ___ ti.",
+    "options": [
+      "por",
+      "para"
+    ],
+    "correct": 1,
+    "why": "para for recipients.",
+    "tier": 3
   }
 ]
