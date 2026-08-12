@@ -9,6 +9,23 @@ want evidence for before spending real effort.
 
 ---
 
+## 0. Who this is for
+
+**This is a personal tool first.** It is built for one learner who wants to learn,
+not for a user base that needs retaining. That is a design constraint, not a
+disclaimer, and it decides arguments: anything whose purpose is to bring someone
+back rather than to teach them something is out, and "but it would improve
+retention" is an argument against a feature here, not for it.
+
+The scorecard's job is to tell the truth about your competence. The moment it
+starts flattering or coercing, it can no longer do that.
+
+Consequences that follow: local-first storage, no telemetry, no accounts, no
+network required, and a codebase small enough for its owner to read in an
+evening.
+
+---
+
 ## 1. The thesis
 
 Most learning software is a quiz with a progress bar. It tests recall of items
