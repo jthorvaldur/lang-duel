@@ -1,0 +1,119 @@
+[
+  {
+    "text": "Yo ___ español.",
+    "answer": "hablo",
+    "alts": [],
+    "en": "I speak Spanish.",
+    "tier": 1,
+    "note": ""
+  },
+  {
+    "text": "¿___ estás?",
+    "answer": "Cómo",
+    "alts": [],
+    "en": "How are you?",
+    "tier": 1,
+    "note": ""
+  },
+  {
+    "text": "No ___.",
+    "answer": "entiendo",
+    "alts": [
+      "no comprendo"
+    ],
+    "en": "I don't understand.",
+    "tier": 1,
+    "note": ""
+  },
+  {
+    "text": "___ las dos.",
+    "answer": "Son",
+    "alts": [],
+    "en": "It's two o'clock.",
+    "tier": 1,
+    "note": "Time uses ser: 'Son las dos', 'Es la una'."
+  },
+  {
+    "text": "Ella ___ cansada.",
+    "answer": "está",
+    "alts": [],
+    "en": "She is tired.",
+    "tier": 1,
+    "note": "estar, because tired is a state, not an identity."
+  },
+  {
+    "text": "¿Dónde ___ el baño?",
+    "answer": "está",
+    "alts": [],
+    "en": "Where is the bathroom?",
+    "tier": 2,
+    "note": ""
+  },
+  {
+    "text": "¿Cuánto ___?",
+    "answer": "cuesta",
+    "alts": [],
+    "en": "How much does it cost?",
+    "tier": 2,
+    "note": ""
+  },
+  {
+    "text": "Ellos ___ hambre.",
+    "answer": "tienen",
+    "alts": [],
+    "en": "They are hungry.",
+    "tier": 2,
+    "note": "Spanish 'has hunger': tener hambre, not *estar hambre*."
+  },
+  {
+    "text": "¿Cómo te ___?",
+    "answer": "llamas",
+    "alts": [],
+    "en": "What is your name?",
+    "tier": 2,
+    "note": "Literally: how do you call yourself?"
+  },
+  {
+    "text": "Nosotros ___ en Madrid.",
+    "answer": "vivimos",
+    "alts": [],
+    "en": "We live in Madrid.",
+    "tier": 2,
+    "note": ""
+  },
+  {
+    "text": "¡___ mañana!",
+    "answer": "Hasta",
+    "alts": [],
+    "en": "See you tomorrow!",
+    "tier": 3,
+    "note": ""
+  },
+  {
+    "text": "___ un café, por favor.",
+    "answer": "Quisiera",
+    "alts": [
+      "Quiero",
+      "Me gustaría"
+    ],
+    "en": "I'd like a coffee, please.",
+    "tier": 3,
+    "note": "'Quisiera' is the soft, polite order."
+  },
+  {
+    "text": "Ayer ___ al mercado.",
+    "answer": "fui",
+    "alts": [],
+    "en": "Yesterday I went to the market.",
+    "tier": 3,
+    "note": ""
+  },
+  {
+    "text": "Cuando era niño, ___ en la playa.",
+    "answer": "jugaba",
+    "alts": [],
+    "en": "When I was a kid, I used to play at the beach.",
+    "tier": 3,
+    "note": "Imperfect: a habit in the past."
+  }
+]

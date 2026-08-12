@@ -1,0 +1,49 @@
+{
+  "pairs": {
+    "comer": [
+      "bread",
+      "food"
+    ],
+    "beber": [
+      "water"
+    ],
+    "tener": [
+      "money",
+      "time"
+    ],
+    "necesitar": [
+      "money",
+      "water",
+      "time",
+      "work"
+    ],
+    "trabajar": [
+      "today",
+      "tomorrow",
+      "now",
+      "here"
+    ],
+    "vivir": [
+      "here",
+      "there"
+    ]
+  },
+  "places": {
+    "house": [
+      "la casa",
+      "the house"
+    ],
+    "book": [
+      "el libro",
+      "the book"
+    ],
+    "door": [
+      "la puerta",
+      "the door"
+    ],
+    "street": [
+      "la calle",
+      "the street"
+    ]
+  }
+}

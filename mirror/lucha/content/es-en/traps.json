@@ -1,0 +1,222 @@
+[
+  {
+    "pair": "ser o estar",
+    "text": "Ella ___ cansada.",
+    "options": [
+      "es",
+      "está"
+    ],
+    "correct": 1,
+    "why": "estar for states — tired passes. ser is what you ARE.",
+    "tier": 2
+  },
+  {
+    "pair": "ser o estar",
+    "text": "Él ___ médico.",
+    "options": [
+      "es",
+      "está"
+    ],
+    "correct": 0,
+    "why": "ser for identity and occupation.",
+    "tier": 2
+  },
+  {
+    "pair": "ser o estar",
+    "text": "___ las dos.",
+    "options": [
+      "Son",
+      "Están"
+    ],
+    "correct": 0,
+    "why": "time is always ser: son las dos, es la una.",
+    "tier": 2
+  },
+  {
+    "pair": "ser o estar",
+    "text": "Madrid ___ en España.",
+    "options": [
+      "es",
+      "está"
+    ],
+    "correct": 1,
+    "why": "location is estar — even for places that never move.",
+    "tier": 2
+  },
+  {
+    "pair": "ser o estar",
+    "text": "La fiesta ___ en mi casa.",
+    "options": [
+      "es",
+      "está"
+    ],
+    "correct": 0,
+    "why": "events happen with ser: la fiesta ES en mi casa. Things ARE somewhere: el libro ESTÁ aquí.",
+    "tier": 2
+  },
+  {
+    "pair": "ser o estar",
+    "text": "___ lloviendo.",
+    "options": [
+      "Es",
+      "Está"
+    ],
+    "correct": 1,
+    "why": "estar + gerund = happening right now.",
+    "tier": 2
+  },
+  {
+    "pair": "por o para",
+    "text": "Gracias ___ tu ayuda.",
+    "options": [
+      "por",
+      "para"
+    ],
+    "correct": 0,
+    "why": "por for reasons: thanks because-of your help.",
+    "tier": 3
+  },
+  {
+    "pair": "por o para",
+    "text": "Salimos ___ Madrid mañana.",
+    "options": [
+      "por",
+      "para"
+    ],
+    "correct": 1,
+    "why": "para for destinations.",
+    "tier": 3
+  },
+  {
+    "pair": "por o para",
+    "text": "Un regalo ___ ti.",
+    "options": [
+      "por",
+      "para"
+    ],
+    "correct": 1,
+    "why": "para for recipients.",
+    "tier": 3
+  },
+  {
+    "pair": "por o para",
+    "text": "Pagué diez euros ___ el libro.",
+    "options": [
+      "por",
+      "para"
+    ],
+    "correct": 0,
+    "why": "por for exchanges — money for a book.",
+    "tier": 3
+  },
+  {
+    "pair": "por o para",
+    "text": "Estudio ___ médico.",
+    "options": [
+      "por",
+      "para"
+    ],
+    "correct": 1,
+    "why": "para for goals: in order to become.",
+    "tier": 3
+  },
+  {
+    "pair": "por o para",
+    "text": "Hablo ___ teléfono.",
+    "options": [
+      "por",
+      "para"
+    ],
+    "correct": 0,
+    "why": "por for the channel: by phone.",
+    "tier": 3
+  },
+  {
+    "pair": "saber o conocer",
+    "text": "¿___ nadar?",
+    "options": [
+      "Sabes",
+      "Conoces"
+    ],
+    "correct": 0,
+    "why": "saber + infinitive = know how to.",
+    "tier": 3
+  },
+  {
+    "pair": "saber o conocer",
+    "text": "¿___ Madrid?",
+    "options": [
+      "Sabes",
+      "Conoces"
+    ],
+    "correct": 1,
+    "why": "conocer for places and people — to be familiar with.",
+    "tier": 3
+  },
+  {
+    "pair": "saber o conocer",
+    "text": "No ___ la respuesta.",
+    "options": [
+      "sé",
+      "conozco"
+    ],
+    "correct": 0,
+    "why": "saber for facts.",
+    "tier": 3
+  },
+  {
+    "pair": "saber o conocer",
+    "text": "___ a tu hermano.",
+    "options": [
+      "Sé",
+      "Conozco"
+    ],
+    "correct": 1,
+    "why": "conocer for people.",
+    "tier": 3
+  },
+  {
+    "pair": "pretérito o imperfecto",
+    "text": "Ayer ___ al cine.",
+    "options": [
+      "fui",
+      "iba"
+    ],
+    "correct": 0,
+    "why": "one finished event → preterite.",
+    "tier": 3
+  },
+  {
+    "pair": "pretérito o imperfecto",
+    "text": "Cada verano ___ a la playa.",
+    "options": [
+      "fui",
+      "iba"
+    ],
+    "correct": 1,
+    "why": "a habit in the past → imperfect.",
+    "tier": 3
+  },
+  {
+    "pair": "pretérito o imperfecto",
+    "text": "Mientras dormía, ___ el teléfono.",
+    "options": [
+      "sonó",
+      "sonaba"
+    ],
+    "correct": 0,
+    "why": "the interrupting event → preterite; the scene around it → imperfect.",
+    "tier": 3
+  },
+  {
+    "pair": "pretérito o imperfecto",
+    "text": "Eran las ocho cuando ___.",
+    "options": [
+      "llegué",
+      "llegaba"
+    ],
+    "correct": 0,
+    "why": "the clock time sets the scene (imperfect); what happened → preterite.",
+    "tier": 3
+  }
+]

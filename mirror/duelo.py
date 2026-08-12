@@ -13,6 +13,13 @@ The brief, point by point:
     language most wrong            error mass of your weaker side (shown on the card)
   * scoring card                 → wins/losses, streaks, and "dominadas": words
                                    proven correct both ways, accumulated + repeated
+  * spaced repetition            → Leitner boxes schedule every item into the
+                                   future; due reviews jump the queue
+  * classic traps                → ser/estar, por/para, saber/conocer and
+                                   pretérito/imperfecto as forced choices
+  * functional depth             → numbers, prices, telling time, gender, and
+                                   fresh sentences generated from your dominadas
+                                   (the map: old words in new situations)
   * make it fun                  → HP bars, combos, trash talk, seasons, ranks
 
 No dependencies. Saves to save.json next to this script.
@@ -30,10 +37,13 @@ import time
 import unicodedata
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Callable
 
 SAVE_PATH = Path(__file__).resolve().with_name("save.json")
 PLAYER_HP = 10
 SOLID_HITS = 2  # clean hits per direction before a word counts as "dominada"
+# Leitner schedule by box: 0 = due now, then 10 min, 1 h, 1 d, 3 d, 7 d.
+INTERVALS = (0, 600, 3600, 86400, 259200, 604800)
 
 # --------------------------------------------------------------------------
 # Content: vocabulary
@@ -312,6 +322,158 @@ CLOZES: tuple[Cloze, ...] = (
 )
 
 # --------------------------------------------------------------------------
+# Content: classic traps — forced choices for the famous confusables
+# --------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class Trap:
+    pair: str          # "ser o estar"
+    text: str          # sentence with ___ where the choice goes
+    options: tuple[str, str]
+    correct: int       # index into options
+    why: str
+    tier: int = 2
+
+
+TRAPS: tuple[Trap, ...] = (
+    # --- ser / estar --------------------------------------------------------
+    Trap("ser o estar", "Ella ___ cansada.", ("es", "está"), 1,
+         "estar for states — tired passes. ser is what you ARE."),
+    Trap("ser o estar", "Él ___ médico.", ("es", "está"), 0,
+         "ser for identity and occupation."),
+    Trap("ser o estar", "___ las dos.", ("Son", "Están"), 0,
+         "time is always ser: son las dos, es la una."),
+    Trap("ser o estar", "Madrid ___ en España.", ("es", "está"), 1,
+         "location is estar — even for places that never move."),
+    Trap("ser o estar", "La fiesta ___ en mi casa.", ("es", "está"), 0,
+         "events happen with ser: la fiesta ES en mi casa. "
+         "Things ARE somewhere: el libro ESTÁ aquí."),
+    Trap("ser o estar", "___ lloviendo.", ("Es", "Está"), 1,
+         "estar + gerund = happening right now."),
+    # --- por / para ---------------------------------------------------------
+    Trap("por o para", "Gracias ___ tu ayuda.", ("por", "para"), 0,
+         "por for reasons: thanks because-of your help.", tier=3),
+    Trap("por o para", "Salimos ___ Madrid mañana.", ("por", "para"), 1,
+         "para for destinations.", tier=3),
+    Trap("por o para", "Un regalo ___ ti.", ("por", "para"), 1,
+         "para for recipients.", tier=3),
+    Trap("por o para", "Pagué diez euros ___ el libro.", ("por", "para"), 0,
+         "por for exchanges — money for a book.", tier=3),
+    Trap("por o para", "Estudio ___ médico.", ("por", "para"), 1,
+         "para for goals: in order to become.", tier=3),
+    Trap("por o para", "Hablo ___ teléfono.", ("por", "para"), 0,
+         "por for the channel: by phone.", tier=3),
+    # --- saber / conocer ----------------------------------------------------
+    Trap("saber o conocer", "¿___ nadar?", ("Sabes", "Conoces"), 0,
+         "saber + infinitive = know how to.", tier=3),
+    Trap("saber o conocer", "¿___ Madrid?", ("Sabes", "Conoces"), 1,
+         "conocer for places and people — to be familiar with.", tier=3),
+    Trap("saber o conocer", "No ___ la respuesta.", ("sé", "conozco"), 0,
+         "saber for facts.", tier=3),
+    Trap("saber o conocer", "___ a tu hermano.", ("Sé", "Conozco"), 1,
+         "conocer for people.", tier=3),
+    # --- preterite / imperfect ----------------------------------------------
+    Trap("pretérito o imperfecto", "Ayer ___ al cine.", ("fui", "iba"), 0,
+         "one finished event → preterite.", tier=3),
+    Trap("pretérito o imperfecto", "Cada verano ___ a la playa.", ("fui", "iba"), 1,
+         "a habit in the past → imperfect.", tier=3),
+    Trap("pretérito o imperfecto", "Mientras dormía, ___ el teléfono.",
+         ("sonó", "sonaba"), 0,
+         "the interrupting event → preterite; the scene around it → imperfect.", tier=3),
+    Trap("pretérito o imperfecto", "Eran las ocho cuando ___.", ("llegué", "llegaba"), 0,
+         "the clock time sets the scene (imperfect); what happened → preterite.", tier=3),
+)
+
+# --------------------------------------------------------------------------
+# Content: gender — the article drills that folding articles away never tests
+# --------------------------------------------------------------------------
+
+# es noun -> (article, note). Only nouns that live in WORDS.
+GENDERS: dict[str, tuple[str, str]] = {
+    "casa": ("la", ""), "comida": ("la", ""), "noche": ("la", ""),
+    "calle": ("la", ""), "ciudad": ("la", ""), "puerta": ("la", ""),
+    "palabra": ("la", ""), "pregunta": ("la", ""), "familia": ("la", ""),
+    "mujer": ("la", ""), "pan": ("el", ""), "dinero": ("el", ""),
+    "trabajo": ("el", ""), "libro": ("el", ""), "tiempo": ("el", ""),
+    "error": ("el", ""), "hombre": ("el", ""), "amigo": ("el", ""),
+    "día": ("el", "ends in -a, still masculine — el día"),
+    "agua": ("el", "feminine, but el for the sound — las aguas"),
+}
+
+# --------------------------------------------------------------------------
+# Content: generated sentences — dominadas reappear in new situations
+# --------------------------------------------------------------------------
+
+_SUBJECTS = (("yo", "I", 0), ("tú", "you", 1), ("él", "he", 2),
+             ("nosotros", "we", 3), ("ellos", "they", 5))
+
+# verb infinitive -> complement en keys the verb can sensibly take
+_SENTENCE_PAIRS = {
+    "comer": ("bread", "food"),
+    "beber": ("water",),
+    "tener": ("money", "time"),
+    "necesitar": ("money", "water", "time", "work"),
+    "trabajar": ("today", "tomorrow", "now", "here"),
+    "vivir": ("here", "there"),
+}
+
+# placeable nouns for "¿Dónde está...?" — en key -> (es phrase, en phrase)
+_PLACES = {"house": ("la casa", "the house"), "book": ("el libro", "the book"),
+           "door": ("la puerta", "the door"), "street": ("la calle", "the street")}
+
+# --------------------------------------------------------------------------
+# Content: numbers, prices, time — infinite drills from a RNG
+# --------------------------------------------------------------------------
+
+_NUM_UNITS = ("cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete",
+              "ocho", "nueve", "diez", "once", "doce", "trece", "catorce", "quince")
+_NUM_16_19 = ("dieciséis", "diecisiete", "dieciocho", "diecinueve")
+_NUM_20S = ("veinte", "veintiún", "veintidós", "veintitrés", "veinticuatro",
+            "veinticinco", "veintiséis", "veintisiete", "veintiocho", "veintinueve")
+_NUM_TENS = {30: "treinta", 40: "cuarenta", 50: "cincuenta", 60: "sesenta",
+             70: "setenta", 80: "ochenta", 90: "noventa"}
+
+
+def num_es(n: int) -> str:
+    """0-99 in Spanish — enough for prices, times and small change."""
+    if n < 16:
+        return _NUM_UNITS[n]
+    if n < 20:
+        return _NUM_16_19[n - 16]
+    if n < 30:
+        return _NUM_20S[n - 20]
+    tens, rest = divmod(n, 10)
+    return _NUM_TENS[tens * 10] if rest == 0 else f"{_NUM_TENS[tens * 10]} y {num_es(rest)}"
+
+
+def _un_variant(s: str) -> str | None:
+    """uno -> un before a masculine noun ('treinta y un pesos')."""
+    if s == "uno":
+        return "un"
+    if s.endswith(" y uno"):
+        return s[:-1]
+    return None
+
+
+def time_es(h: int, m: int) -> tuple[str, tuple[str, ...]]:
+    """Canonical Spanish clock time plus accepted shorter forms."""
+    if m == 45:
+        h = h % 12 + 1
+        lead = "Es la" if h == 1 else "Son las"
+        hw = "una" if h == 1 else num_es(h)
+        full = f"{lead} {hw} menos cuarto"
+        return full, (full, f"{hw} menos cuarto")
+    lead = "Es la" if h == 1 else "Son las"
+    hw = "una" if h == 1 else num_es(h)
+    tail = {0: "en punto", 15: "y cuarto", 30: "y media"}[m]
+    full = f"{lead} {hw} {tail}"
+    variants = [full, f"{hw} {tail}"]
+    if m == 0:
+        variants += [f"{lead} {hw}", hw]
+    return full, tuple(variants)
+
+# --------------------------------------------------------------------------
 # Content: the ladder
 # --------------------------------------------------------------------------
 
@@ -321,21 +483,29 @@ class Opponent:
     name: str
     epithet: str
     hp: int
-    tier: int          # content ceiling while fighting this opponent
-    verb_share: float  # fraction of turns that are conjugations
+    tier: int            # content ceiling while fighting this opponent
+    verb_share: float    # fraction of turns that are conjugations
     cloze_share: float
-    dmg: int           # HP you lose per miss
+    dmg: int             # HP you lose per miss
+    trap_share: float = 0.0
+    num_share: float = 0.0
+    gender_share: float = 0.0
+    # vocab takes whatever share is left; sentences take 0.12 when ingredients exist
 
 
 OPPONENTS: tuple[Opponent, ...] = (
     Opponent("El Turista", "just got off the plane — survival words, present tense",
-             hp=8, tier=1, verb_share=0.25, cloze_share=0.10, dmg=1),
+             hp=8, tier=1, verb_share=0.25, cloze_share=0.10, dmg=1,
+             num_share=0.10),
     Opponent("La Maestra Severa", "everyday vocabulary, past tense, real sentences",
-             hp=10, tier=2, verb_share=0.35, cloze_share=0.15, dmg=1),
+             hp=10, tier=2, verb_share=0.28, cloze_share=0.12, dmg=1,
+             trap_share=0.08, num_share=0.08, gender_share=0.06),
     Opponent("El Pretérito Impasible", "the past is his home turf; habits too",
-             hp=12, tier=3, verb_share=0.45, cloze_share=0.15, dmg=1),
+             hp=12, tier=3, verb_share=0.36, cloze_share=0.12, dmg=1,
+             trap_share=0.10, num_share=0.06, gender_share=0.06),
     Opponent("El Verbo Supremo", "champion. every tense, every form, hits twice as hard",
-             hp=16, tier=3, verb_share=0.55, cloze_share=0.20, dmg=2),
+             hp=16, tier=3, verb_share=0.40, cloze_share=0.15, dmg=2,
+             trap_share=0.12, num_share=0.05, gender_share=0.06),
 )
 
 # --------------------------------------------------------------------------
@@ -391,13 +561,16 @@ def grade(answer: str, accepted: tuple[str, ...]) -> str:
 @dataclass
 class Question:
     key: str                 # stable id: "w:water" / "v:tener:present:1" / "c:3"
-    kind: str                # "word" | "verb" | "cloze"
+    kind: str                # word | verb | cloze | trap | gender | num | sentence
     target_lang: str         # language the player must produce
     prompt: str
     sub: str                 # small line under the prompt
     accepted: tuple[str, ...]
     canonical: str
     teach: list[str] = field(default_factory=list)
+    # item keys that also get a +1 when this question is answered correctly —
+    # using "pan" inside a fresh sentence still feeds the w:bread... map entry
+    also_credit: tuple[str, ...] = ()
 
 
 def word_question(w: Word, lang: str) -> Question:
@@ -458,6 +631,153 @@ def cloze_question(idx: int, c: Cloze) -> Question:
         accepted=(c.answer,) + c.alts,
         canonical=c.answer,
         teach=teach,
+    )
+
+
+def trap_question(idx: int, t: Trap, rng: random.Random) -> Question:
+    order = [0, 1]
+    rng.shuffle(order)
+    shown = [t.options[i] for i in order]
+    right = t.options[t.correct]
+    pos = shown.index(right) + 1  # 1-based, as printed
+    return Question(
+        key=f"t:{idx}", kind="trap", target_lang="es",
+        prompt=t.text,
+        sub=f"¿{t.pair}?   1) {shown[0]}   2) {shown[1]}",
+        accepted=(right, str(pos)),
+        canonical=right,
+        teach=[f"{t.text.replace('___', right)}  —  {t.why}"],
+    )
+
+
+def gender_question(w: Word) -> Question:
+    article, note = GENDERS[w.es]
+    teach = [f"{article} {w.es}" + (f"  —  {note}" if note else "")]
+    return Question(
+        key=f"g:{w.en}", kind="gender", target_lang="es",
+        prompt=f"___ {w.es}", sub="¿el o la?",
+        accepted=(article, f"{article} {w.es}"),
+        canonical=article,
+        teach=teach,
+        also_credit=(f"w:{w.en}",),
+    )
+
+
+def num_question(rng: random.Random, lang: str) -> Question:
+    roll = rng.random()
+    if roll < 0.45:  # plain number, both directions
+        n = rng.randint(1, 99)
+        if lang == "es":
+            accepted = (num_es(n),)
+            alt = _un_variant(num_es(n))
+            if alt:
+                accepted += (alt,)
+            return Question(
+                key=f"n:{n}", kind="num", target_lang="es",
+                prompt=str(n), sub="escríbelo en español",
+                accepted=accepted, canonical=num_es(n))
+        return Question(
+            key=f"n:{num_es(n)}", kind="num", target_lang="en",
+            prompt=num_es(n), sub="write the number",
+            accepted=(str(n),), canonical=str(n))
+    if roll < 0.72:  # the market price
+        n = rng.randint(2, 99)
+        accepted = (num_es(n),)
+        alt = _un_variant(num_es(n))
+        if alt:
+            accepted += (alt,)
+        return Question(
+            key=f"n:p:{n}", kind="num", target_lang="es",
+            prompt=f"— ¿Cuánto cuesta? — Cuesta ___ pesos.",
+            sub=f"«It costs {n} pesos.»",
+            accepted=accepted, canonical=num_es(n),
+            teach=[f"Cuesta {num_es(n)} pesos.  —  It costs {n} pesos."])
+    # telling time
+    h, m = rng.randint(1, 12), rng.choice((0, 15, 30, 45))
+    full, variants = time_es(h, m)
+    clock = f"{h}:{m:02d}"
+    if lang == "es":
+        return Question(
+            key=f"n:t:{clock}", kind="num", target_lang="es",
+            prompt=f"🕒 {clock}", sub="dilo en español",
+            accepted=variants, canonical=full)
+    return Question(
+        key=f"n:t:{full}", kind="num", target_lang="en",
+        prompt=f'"{full}"', sub="what time is it? (h:mm)",
+        accepted=(clock,), canonical=clock)
+
+
+def sentence_ready(p: "Profile", opp: Opponent) -> bool:
+    dom = set(p.dominated())
+    if any(k in dom for k in _PLACES):
+        return True
+    return any(
+        w in dom
+        for v, comps in _SENTENCE_PAIRS.items()
+        if VERBS_BY_NAME[v].tier <= opp.tier
+        for w in comps
+    )
+
+
+def sentence_question(p: "Profile", opp: Opponent, lang: str,
+                      rng: random.Random) -> Question | None:
+    """Compose a fresh sentence only from words the map already holds."""
+    dom = set(p.dominated())
+    moves = [(v, w) for v, comps in _SENTENCE_PAIRS.items()
+             if VERBS_BY_NAME[v].tier <= opp.tier
+             for w in comps if w in dom]
+    places = [k for k in _PLACES if k in dom]
+    if not moves and not places:
+        return None
+
+    sub_line = "every word here is already yours — new situation"
+
+    if places and (not moves or rng.random() < 0.25):
+        key = rng.choice(places)
+        es_phrase, en_phrase = _PLACES[key]
+        es = f"¿Dónde está {es_phrase}?"
+        en = f"Where is {en_phrase}?"
+        accepted_es = (es, es.replace("¿Dónde", "Dónde"), f"dónde está {es_phrase}")
+        accepted_en = (en, f"Where's {en_phrase}?", f"Where's {en_phrase}")
+        return Question(
+            key=f"s:{es}", kind="sentence", target_lang=lang,
+            prompt=f'"{en}"' if lang == "es" else f'"{es}"',
+            sub=sub_line,
+            accepted=accepted_es if lang == "es" else accepted_en,
+            canonical=es if lang == "es" else en,
+            teach=[f"{es}  —  {en}"],
+            also_credit=(f"w:{key}",))
+
+    vname, comp_en = rng.choice(moves)
+    verb = VERBS_BY_NAME[vname]
+    comp = next(w for w in WORDS if w.en == comp_en)
+    subj_es, subj_en, pi = rng.choice(_SUBJECTS)
+    form = verb.conjugate("present")[pi]
+    base, third, _ = verb.english()
+    neg = rng.random() < 0.3
+    if neg:
+        es = f"{subj_es} no {form} {comp.es}"
+        aux = "doesn't" if pi == 2 else "don't"
+        en = f"{subj_en} {aux} {base} {comp.en}"
+    else:
+        es = f"{subj_es} {form} {comp.es}"
+        en = f"{subj_en} {third if pi == 2 else base} {comp.en}"
+    bare = es.split(" ", 1)[1]  # drop the pronoun — always legal in Spanish
+    accepted_es = [es, bare]
+    if comp.es_alts:
+        accepted_es += [es.replace(comp.es, comp.es_alts[0]),
+                        bare.replace(comp.es, comp.es_alts[0])]
+    accepted_en = [en]
+    if pi == 2:  # él hides ella
+        accepted_en += [en.replace("he ", "she ", 1), en.replace("He ", "She ", 1)]
+    return Question(
+        key=f"s:{es}", kind="sentence", target_lang=lang,
+        prompt=f'"{en}"' if lang == "es" else f'"{es}"',
+        sub=sub_line,
+        accepted=tuple(accepted_es) if lang == "es" else tuple(accepted_en),
+        canonical=es if lang == "es" else en,
+        teach=[f"{es}  —  {en}"],
+        also_credit=(f"w:{comp.en}", f"v:{vname}:present:{pi}"),
     )
 
 
@@ -524,6 +844,14 @@ class Profile:
             and rec.get("es", 0) >= SOLID_HITS
         )
 
+    def due_now(self) -> int:
+        now = time.time()
+        return sum(1 for r in self.items.values() if 0 < r.get("due", 0) <= now)
+
+    def scheduled_ahead(self) -> int:
+        now = time.time()
+        return sum(1 for r in self.items.values() if r.get("due", 0) > now)
+
     def rank(self) -> str:
         for threshold, name in (
             (2400, "Leyenda del Barrio"),
@@ -542,11 +870,16 @@ class Profile:
         rec = self.items.setdefault(q.key, {"en": 0, "es": 0, "miss": 0})
         attempts, hits = self.lang_record[q.target_lang]
         self.lang_record[q.target_lang] = [attempts + 1, hits + (result == "hit")]
+        box = rec.get("box", 0)
         if result == "hit":
             self.wins += 1
             self.streak += 1
             self.best_streak = max(self.best_streak, self.streak)
             rec[q.target_lang] = rec.get(q.target_lang, 0) + 1
+            for k in q.also_credit:  # feeding the map from new situations
+                cr = self.items.setdefault(k, {"en": 0, "es": 0, "miss": 0})
+                cr[q.target_lang] = cr.get(q.target_lang, 0) + 1
+            box = min(box + 1, len(INTERVALS) - 1)
             gained = 10 + min(self.streak, 10) * 2 + (5 if q.kind != "word" else 0)
         elif result == "close":
             self.close_calls += 1  # a shave keeps the streak, pays less
@@ -556,7 +889,11 @@ class Profile:
             self.streak = 0
             rec["miss"] = rec.get("miss", 0) + 1
             rec[q.target_lang] = max(0, rec.get(q.target_lang, 0) - 1)
+            box = 0
             gained = 0
+        # Leitner: a hit pushes the next review further out, a miss pulls it close
+        rec["box"] = box
+        rec["due"] = time.time() + (INTERVALS[1] if result == "miss" else INTERVALS[box])
         self.xp += gained
         return gained
 
@@ -580,6 +917,12 @@ class Selector:
         if (rec.get("en", 0) >= SOLID_HITS and rec.get("es", 0) >= SOLID_HITS
                 and rec.get("miss", 0) == 0):
             w *= 0.15  # dominada: stays in rotation, quietly
+        due = rec.get("due", 0)
+        now = time.time()
+        if due > now:
+            w *= 0.04  # scheduled ahead — leave it for later
+        elif due and rec.get("box", 0) >= 2:
+            w *= 2.5  # a real review comes due — jump the queue
         return max(w, 0.05)
 
     def next(self, opp: Opponent) -> Question:
@@ -592,11 +935,26 @@ class Selector:
         return q
 
     def _pick(self, lang: str, opp: Opponent) -> Question:
+        # Each kind owns a share of the wheel; vocab takes what is left.
+        # Spanish-only kinds (cloze/trap/gender) roll over to vocab en→en.
+        shares: list[tuple[float, Callable[[], Question]]] = [
+            (opp.verb_share, lambda: self._pick_verb(lang, opp)),
+            (opp.num_share, lambda: num_question(self.rng, lang)),
+        ]
+        if lang == "es":
+            shares += [
+                (opp.cloze_share, lambda: self._pick_cloze(opp)),
+                (opp.trap_share, lambda: self._pick_trap(opp)),
+                (opp.gender_share, lambda: self._pick_gender(opp)),
+            ]
+        if sentence_ready(self.p, opp):
+            shares.append((0.12, lambda: self._pick_sentence(lang, opp)))
         roll = self.rng.random()
-        if lang == "es" and roll < opp.cloze_share:
-            return self._pick_cloze(opp)
-        if roll < opp.cloze_share + opp.verb_share:
-            return self._pick_verb(lang, opp)
+        acc = 0.0
+        for share, fn in shares:
+            acc += share
+            if roll < acc:
+                return fn()
         return self._pick_word(lang, opp)
 
     def _pick_word(self, lang: str, opp: Opponent) -> Question:
@@ -620,6 +978,21 @@ class Selector:
         weights = [self._weight(f"c:{i}", "es") for i, _ in pool]
         i, c = self.rng.choices(pool, weights=weights, k=1)[0]
         return cloze_question(i, c)
+
+    def _pick_trap(self, opp: Opponent) -> Question:
+        pool = [(i, t) for i, t in enumerate(TRAPS) if t.tier <= opp.tier]
+        weights = [self._weight(f"t:{i}", "es") for i, _ in pool]
+        i, t = self.rng.choices(pool, weights=weights, k=1)[0]
+        return trap_question(i, t, self.rng)
+
+    def _pick_gender(self, opp: Opponent) -> Question:
+        pool = [w for w in WORDS if w.es in GENDERS and w.tier <= opp.tier]
+        weights = [self._weight(f"g:{w.en}", "es") for w in pool]
+        return gender_question(self.rng.choices(pool, weights=weights, k=1)[0])
+
+    def _pick_sentence(self, lang: str, opp: Opponent) -> Question:
+        q = sentence_question(self.p, opp, lang, self.rng)
+        return q if q is not None else self._pick_word(lang, opp)
 
 
 # --------------------------------------------------------------------------
@@ -707,6 +1080,8 @@ def scorecard(p: Profile) -> None:
           + dim("  (leans on your weaker side)"))
     print(f"  dominadas (both ways agreed): {bold(green(str(len(dom))))}"
           + (dim("   " + ", ".join(dom[:10]) + ("…" if len(dom) > 10 else "")) if dom else ""))
+    print(f"  reviews due now: {bold(str(p.due_now()))}"
+          + dim(f" · {p.scheduled_ahead()} scheduled ahead (Leitner)"))
     beaten = p.ladder_progress % len(OPPONENTS)
     print("  ladder: " + "  ".join(
         (green("✓ ") if i < beaten else bold("▶ ") if i == beaten else dim("· ")) + o.name

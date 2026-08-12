@@ -1,0 +1,350 @@
+[
+  {
+    "infinitive": "ser",
+    "en": "to be",
+    "gloss": "be (permanent: who/what you are)",
+    "en_forms": [
+      "be",
+      "is",
+      "was"
+    ],
+    "irregular": {
+      "present": [
+        "soy",
+        "eres",
+        "es",
+        "somos",
+        "sois",
+        "son"
+      ],
+      "preterite": [
+        "fui",
+        "fuiste",
+        "fue",
+        "fuimos",
+        "fuisteis",
+        "fueron"
+      ],
+      "imperfect": [
+        "era",
+        "eras",
+        "era",
+        "éramos",
+        "erais",
+        "eran"
+      ]
+    },
+    "note": "ser = identity/origin/time. Preterite is identical to ir — context decides.",
+    "tier": 1,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "estar",
+    "en": "to be",
+    "gloss": "be (state/location: right now)",
+    "en_forms": [
+      "be",
+      "is",
+      "was"
+    ],
+    "irregular": {
+      "present": [
+        "estoy",
+        "estás",
+        "está",
+        "estamos",
+        "estáis",
+        "están"
+      ],
+      "preterite": [
+        "estuve",
+        "estuviste",
+        "estuvo",
+        "estuvimos",
+        "estuvisteis",
+        "estuvieron"
+      ]
+    },
+    "note": "estar = temporary states and places. 'Estoy cansado' vs 'Soy alto'.",
+    "tier": 1,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "tener",
+    "en": "to have",
+    "gloss": "have",
+    "en_forms": [
+      "have",
+      "has",
+      "had"
+    ],
+    "irregular": {
+      "present": [
+        "tengo",
+        "tienes",
+        "tiene",
+        "tenemos",
+        "tenéis",
+        "tienen"
+      ],
+      "preterite": [
+        "tuve",
+        "tuviste",
+        "tuvo",
+        "tuvimos",
+        "tuvisteis",
+        "tuvieron"
+      ]
+    },
+    "note": "e→ie in the boot. Idiom: tener hambre = to be hungry.",
+    "tier": 1,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "hablar",
+    "en": "to speak",
+    "gloss": "speak, talk",
+    "en_forms": [],
+    "irregular": {},
+    "note": "",
+    "tier": 1,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "comer",
+    "en": "to eat",
+    "gloss": "eat",
+    "en_forms": [
+      "eat",
+      "eats",
+      "ate"
+    ],
+    "irregular": {},
+    "note": "",
+    "tier": 1,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "vivir",
+    "en": "to live",
+    "gloss": "live",
+    "en_forms": [],
+    "irregular": {},
+    "note": "",
+    "tier": 1,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "ir",
+    "en": "to go",
+    "gloss": "go",
+    "en_forms": [
+      "go",
+      "goes",
+      "went"
+    ],
+    "irregular": {
+      "present": [
+        "voy",
+        "vas",
+        "va",
+        "vamos",
+        "vais",
+        "van"
+      ],
+      "preterite": [
+        "fui",
+        "fuiste",
+        "fue",
+        "fuimos",
+        "fuisteis",
+        "fueron"
+      ],
+      "imperfect": [
+        "iba",
+        "ibas",
+        "iba",
+        "íbamos",
+        "ibais",
+        "iban"
+      ]
+    },
+    "note": "ir + a + infinitive = the easy future: 'voy a comer' = I'm going to eat.",
+    "tier": 2,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "hacer",
+    "en": "to do / to make",
+    "gloss": "do, make",
+    "en_forms": [
+      "do",
+      "does",
+      "did"
+    ],
+    "irregular": {
+      "present": [
+        "hago",
+        "haces",
+        "hace",
+        "hacemos",
+        "hacéis",
+        "hacen"
+      ],
+      "preterite": [
+        "hice",
+        "hiciste",
+        "hizo",
+        "hicimos",
+        "hicisteis",
+        "hicieron"
+      ]
+    },
+    "note": "hizo keeps the sound with a z.",
+    "tier": 2,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "querer",
+    "en": "to want",
+    "gloss": "want",
+    "en_forms": [
+      "want",
+      "wants",
+      "wanted"
+    ],
+    "irregular": {
+      "present": [
+        "quiero",
+        "quieres",
+        "quiere",
+        "queremos",
+        "queréis",
+        "quieren"
+      ],
+      "preterite": [
+        "quise",
+        "quisiste",
+        "quiso",
+        "quisimos",
+        "quisisteis",
+        "quisieron"
+      ]
+    },
+    "note": "e→ie in the boot. 'Quisiera' is the polite way to order.",
+    "tier": 2,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "poder",
+    "en": "to be able / can",
+    "gloss": "can, be able to",
+    "en_forms": [
+      "can",
+      "can",
+      "could"
+    ],
+    "irregular": {
+      "present": [
+        "puedo",
+        "puedes",
+        "puede",
+        "podemos",
+        "podéis",
+        "pueden"
+      ],
+      "preterite": [
+        "pude",
+        "pudiste",
+        "pudo",
+        "pudimos",
+        "pudisteis",
+        "pudieron"
+      ]
+    },
+    "note": "o→ue in the boot.",
+    "tier": 2,
+    "imperfect_ok": false
+  },
+  {
+    "infinitive": "beber",
+    "en": "to drink",
+    "gloss": "drink",
+    "en_forms": [
+      "drink",
+      "drinks",
+      "drank"
+    ],
+    "irregular": {},
+    "note": "",
+    "tier": 2,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "trabajar",
+    "en": "to work",
+    "gloss": "work",
+    "en_forms": [],
+    "irregular": {},
+    "note": "",
+    "tier": 2,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "necesitar",
+    "en": "to need",
+    "gloss": "need",
+    "en_forms": [],
+    "irregular": {},
+    "note": "",
+    "tier": 2,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "aprender",
+    "en": "to learn",
+    "gloss": "learn",
+    "en_forms": [],
+    "irregular": {},
+    "note": "",
+    "tier": 2,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "escribir",
+    "en": "to write",
+    "gloss": "write",
+    "en_forms": [
+      "write",
+      "writes",
+      "wrote"
+    ],
+    "irregular": {},
+    "note": "",
+    "tier": 3,
+    "imperfect_ok": true
+  },
+  {
+    "infinitive": "entender",
+    "en": "to understand",
+    "gloss": "understand",
+    "en_forms": [
+      "understand",
+      "understands",
+      "understood"
+    ],
+    "irregular": {
+      "present": [
+        "entiendo",
+        "entiendes",
+        "entiende",
+        "entendemos",
+        "entendéis",
+        "entienden"
+      ]
+    },
+    "note": "e→ie in the boot. 'No entiendo' is a survival phrase.",
+    "tier": 3,
+    "imperfect_ok": true
+  }
+]

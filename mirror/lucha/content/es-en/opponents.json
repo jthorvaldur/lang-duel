@@ -1,0 +1,50 @@
+[
+  {
+    "name": "El Turista",
+    "epithet": "just got off the plane — survival words, present tense",
+    "hp": 8,
+    "tier": 1,
+    "verb_share": 0.25,
+    "cloze_share": 0.1,
+    "dmg": 1,
+    "trap_share": 0.0,
+    "num_share": 0.1,
+    "gender_share": 0.0
+  },
+  {
+    "name": "La Maestra Severa",
+    "epithet": "everyday vocabulary, past tense, real sentences",
+    "hp": 10,
+    "tier": 2,
+    "verb_share": 0.28,
+    "cloze_share": 0.12,
+    "dmg": 1,
+    "trap_share": 0.08,
+    "num_share": 0.08,
+    "gender_share": 0.06
+  },
+  {
+    "name": "El Pretérito Impasible",
+    "epithet": "the past is his home turf; habits too",
+    "hp": 12,
+    "tier": 3,
+    "verb_share": 0.36,
+    "cloze_share": 0.12,
+    "dmg": 1,
+    "trap_share": 0.1,
+    "num_share": 0.06,
+    "gender_share": 0.06
+  },
+  {
+    "name": "El Verbo Supremo",
+    "epithet": "champion. every tense, every form, hits twice as hard",
+    "hp": 16,
+    "tier": 3,
+    "verb_share": 0.4,
+    "cloze_share": 0.15,
+    "dmg": 2,
+    "trap_share": 0.12,
+    "num_share": 0.05,
+    "gender_share": 0.06
+  }
+]

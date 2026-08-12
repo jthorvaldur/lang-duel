@@ -1,0 +1,512 @@
+[
+  {
+    "en": "I",
+    "es": "yo",
+    "tag": "pronoun",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "you",
+    "es": "tú",
+    "tag": "pronoun",
+    "es_alts": [
+      "usted"
+    ],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "we",
+    "es": "nosotros",
+    "tag": "pronoun",
+    "es_alts": [
+      "nosotras"
+    ],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "man",
+    "es": "hombre",
+    "tag": "people",
+    "es_alts": [
+      "el hombre"
+    ],
+    "en_alts": [],
+    "tier": 1,
+    "article": "el"
+  },
+  {
+    "en": "woman",
+    "es": "mujer",
+    "tag": "people",
+    "es_alts": [
+      "la mujer"
+    ],
+    "en_alts": [],
+    "tier": 1,
+    "article": "la"
+  },
+  {
+    "en": "friend",
+    "es": "amigo",
+    "tag": "people",
+    "es_alts": [
+      "amiga"
+    ],
+    "en_alts": [],
+    "tier": 1,
+    "article": "el"
+  },
+  {
+    "en": "water",
+    "es": "agua",
+    "tag": "noun",
+    "es_alts": [
+      "el agua"
+    ],
+    "en_alts": [],
+    "tier": 1,
+    "article": "el",
+    "article_note": "feminine, but el for the sound — las aguas"
+  },
+  {
+    "en": "bread",
+    "es": "pan",
+    "tag": "noun",
+    "es_alts": [
+      "el pan"
+    ],
+    "en_alts": [],
+    "tier": 1,
+    "article": "el"
+  },
+  {
+    "en": "food",
+    "es": "comida",
+    "tag": "noun",
+    "es_alts": [
+      "la comida"
+    ],
+    "en_alts": [
+      "meal"
+    ],
+    "tier": 1,
+    "article": "la"
+  },
+  {
+    "en": "house",
+    "es": "casa",
+    "tag": "noun",
+    "es_alts": [
+      "la casa",
+      "hogar"
+    ],
+    "en_alts": [
+      "home"
+    ],
+    "tier": 1,
+    "article": "la"
+  },
+  {
+    "en": "money",
+    "es": "dinero",
+    "tag": "noun",
+    "es_alts": [
+      "el dinero",
+      "plata"
+    ],
+    "en_alts": [],
+    "tier": 1,
+    "article": "el"
+  },
+  {
+    "en": "day",
+    "es": "día",
+    "tag": "noun",
+    "es_alts": [
+      "el día"
+    ],
+    "en_alts": [],
+    "tier": 1,
+    "article": "el",
+    "article_note": "ends in -a, still masculine — el día"
+  },
+  {
+    "en": "night",
+    "es": "noche",
+    "tag": "noun",
+    "es_alts": [
+      "la noche"
+    ],
+    "en_alts": [],
+    "tier": 1,
+    "article": "la"
+  },
+  {
+    "en": "here",
+    "es": "aquí",
+    "tag": "glue",
+    "es_alts": [
+      "acá"
+    ],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "there",
+    "es": "allí",
+    "tag": "glue",
+    "es_alts": [
+      "ahí",
+      "allá"
+    ],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "now",
+    "es": "ahora",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "today",
+    "es": "hoy",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "tomorrow",
+    "es": "mañana",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "with",
+    "es": "con",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "without",
+    "es": "sin",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "but",
+    "es": "pero",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "because",
+    "es": "porque",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "very",
+    "es": "muy",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "also",
+    "es": "también",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [
+      "too",
+      "as well"
+    ],
+    "tier": 1
+  },
+  {
+    "en": "always",
+    "es": "siempre",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 1
+  },
+  {
+    "en": "child",
+    "es": "niño",
+    "tag": "people",
+    "es_alts": [
+      "niña",
+      "chico"
+    ],
+    "en_alts": [
+      "kid"
+    ],
+    "tier": 2
+  },
+  {
+    "en": "family",
+    "es": "familia",
+    "tag": "people",
+    "es_alts": [
+      "la familia"
+    ],
+    "en_alts": [],
+    "tier": 2,
+    "article": "la"
+  },
+  {
+    "en": "work",
+    "es": "trabajo",
+    "tag": "noun",
+    "es_alts": [
+      "el trabajo"
+    ],
+    "en_alts": [
+      "job"
+    ],
+    "tier": 2,
+    "article": "el"
+  },
+  {
+    "en": "city",
+    "es": "ciudad",
+    "tag": "noun",
+    "es_alts": [
+      "la ciudad"
+    ],
+    "en_alts": [],
+    "tier": 2,
+    "article": "la"
+  },
+  {
+    "en": "street",
+    "es": "calle",
+    "tag": "noun",
+    "es_alts": [
+      "la calle"
+    ],
+    "en_alts": [],
+    "tier": 2,
+    "article": "la"
+  },
+  {
+    "en": "time",
+    "es": "tiempo",
+    "tag": "noun",
+    "es_alts": [
+      "el tiempo",
+      "vez"
+    ],
+    "en_alts": [],
+    "tier": 2,
+    "article": "el"
+  },
+  {
+    "en": "book",
+    "es": "libro",
+    "tag": "noun",
+    "es_alts": [
+      "el libro"
+    ],
+    "en_alts": [],
+    "tier": 2,
+    "article": "el"
+  },
+  {
+    "en": "door",
+    "es": "puerta",
+    "tag": "noun",
+    "es_alts": [
+      "la puerta"
+    ],
+    "tier": 2,
+    "article": "la"
+  },
+  {
+    "en": "word",
+    "es": "palabra",
+    "tag": "noun",
+    "es_alts": [
+      "la palabra"
+    ],
+    "en_alts": [],
+    "tier": 2,
+    "article": "la"
+  },
+  {
+    "en": "good",
+    "es": "bueno",
+    "tag": "adj",
+    "es_alts": [
+      "buena",
+      "buen"
+    ],
+    "en_alts": [],
+    "tier": 2
+  },
+  {
+    "en": "bad",
+    "es": "malo",
+    "tag": "adj",
+    "es_alts": [
+      "mala",
+      "mal"
+    ],
+    "en_alts": [],
+    "tier": 2
+  },
+  {
+    "en": "big",
+    "es": "grande",
+    "tag": "adj",
+    "es_alts": [],
+    "en_alts": [
+      "large"
+    ],
+    "tier": 2
+  },
+  {
+    "en": "small",
+    "es": "pequeño",
+    "tag": "adj",
+    "es_alts": [
+      "pequeña"
+    ],
+    "en_alts": [
+      "little"
+    ],
+    "tier": 2
+  },
+  {
+    "en": "new",
+    "es": "nuevo",
+    "tag": "adj",
+    "es_alts": [
+      "nueva"
+    ],
+    "en_alts": [],
+    "tier": 2
+  },
+  {
+    "en": "never",
+    "es": "nunca",
+    "tag": "glue",
+    "es_alts": [
+      "jamás"
+    ],
+    "en_alts": [],
+    "tier": 2
+  },
+  {
+    "en": "later",
+    "es": "después",
+    "tag": "glue",
+    "es_alts": [
+      "luego"
+    ],
+    "en_alts": [
+      "afterwards"
+    ],
+    "tier": 2
+  },
+  {
+    "en": "neighbor",
+    "es": "vecino",
+    "tag": "people",
+    "es_alts": [
+      "vecina"
+    ],
+    "en_alts": [],
+    "tier": 3
+  },
+  {
+    "en": "question",
+    "es": "pregunta",
+    "tag": "noun",
+    "es_alts": [
+      "la pregunta"
+    ],
+    "en_alts": [],
+    "tier": 3,
+    "article": "la"
+  },
+  {
+    "en": "mistake",
+    "es": "error",
+    "tag": "noun",
+    "es_alts": [
+      "el error"
+    ],
+    "en_alts": [],
+    "tier": 3,
+    "article": "el"
+  },
+  {
+    "en": "old",
+    "es": "viejo",
+    "tag": "adj",
+    "es_alts": [
+      "vieja",
+      "antiguo"
+    ],
+    "en_alts": [],
+    "tier": 3
+  },
+  {
+    "en": "almost",
+    "es": "casi",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 3
+  },
+  {
+    "en": "still",
+    "es": "todavía",
+    "tag": "glue",
+    "es_alts": [
+      "aún"
+    ],
+    "en_alts": [
+      "yet"
+    ],
+    "tier": 3
+  },
+  {
+    "en": "yesterday",
+    "es": "ayer",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [],
+    "tier": 3
+  },
+  {
+    "en": "although",
+    "es": "aunque",
+    "tag": "glue",
+    "es_alts": [],
+    "en_alts": [
+      "even though"
+    ],
+    "tier": 3
+  }
+]
