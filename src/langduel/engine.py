@@ -39,13 +39,18 @@ class ForeignProfile(Exception):
 
 
 # Progressive disclosure. A new player gets word pairs and nothing else; the
-# rest of the app arrives as they earn it, so the first screen stays small.
+# rest of the app arrives as they play, so the first screen stays small.
+#
+# Thresholds are ANSWERS GIVEN, not mastery. Gating features on mastery was a
+# mistake: "words understood" needs four correct answers on one word (twice in
+# each direction) and so sits at zero for a long time, which pushed the good
+# parts of the app absurdly far away. You unlock the app by playing it.
 STAGES: tuple[tuple[str, int, str], ...] = (
     ("words",   0,  "word pairs, both directions"),
-    ("verbs",   6,  "+ verbs in the present tense"),
-    ("lineage", 14, "+ where the words come from, and the sound laws"),
-    ("tenses",  24, "+ the past tenses, and the harder vocabulary"),
-    ("latin",   40, "+ the Latin ancestor shown on every card it applies to"),
+    ("verbs",   5,  "+ verbs in the present tense"),
+    ("lineage", 12, "+ where the words come from, and the sound laws"),
+    ("tenses",  40, "+ the past tenses, and the harder vocabulary"),
+    ("latin",   70, "+ the Latin ancestor shown on every card it applies to"),
 )
 
 
@@ -187,6 +192,10 @@ class Profile:
     # Lineage entries and sound-law patterns the player has been shown.
     discovered: list[str] = field(default_factory=list)
     patterns_seen: list[str] = field(default_factory=list)
+    # High-water mark. A feature that has ever been switched on never switches
+    # back off — thresholds can be retuned without taking things away from
+    # someone mid-game.
+    stage_floor: int = 0
     # Runtime only, never saved: pins the app to an earlier stage so the
     # stripped-back early game stays playable at any level of progress.
     cap: int | None = None
@@ -216,6 +225,10 @@ class Profile:
         if "lang_record" in raw and "axis_record" not in raw:
             raw["axis_record"] = raw.pop("lang_record")
         raw["schema"] = SCHEMA
+        if raw.get("stage_floor") is None and (raw.get("discovered")
+                                               or raw.get("patterns_seen")):
+            # Played before stages existed — do not take the lineage away.
+            raw["stage_floor"] = 2
 
         known = {f for f in cls.__dataclass_fields__ if f not in ("path", "cap")}
         p = cls(path=path, **{k: v for k, v in raw.items() if k in known})
@@ -254,9 +267,9 @@ class Profile:
 
     # -- progressive disclosure -------------------------------------------
     def stage(self) -> int:
-        """How much of the app is switched on, from the mastery already earned."""
-        earned = self.understood() + self.verbs_drilled()
-        reached = max(i for i, (_, need, _) in enumerate(STAGES) if earned >= need)
+        """How much of the app is switched on."""
+        reached = max(i for i, (_, need, _) in enumerate(STAGES) if self.rounds >= need)
+        reached = max(reached, self.stage_floor)
         return reached if self.cap is None else min(reached, self.cap)
 
     def stage_name(self) -> str:
@@ -266,9 +279,8 @@ class Profile:
         return self.stage() >= [s[0] for s in STAGES].index(feature)
 
     def next_unlock(self) -> tuple[str, int] | None:
-        earned = self.understood() + self.verbs_drilled()
         for name, need, blurb in STAGES[self.stage() + 1:]:
-            return blurb, need - earned
+            return blurb, need - self.rounds
         return None
 
     def understood(self) -> int:
@@ -324,6 +336,8 @@ class Profile:
 
         self.xp += gained
         self.unlocked_level = 1 + min(2, self.understood() // 12)
+        if self.cap is None:
+            self.stage_floor = max(self.stage_floor, self.stage())
         return gained
 
 

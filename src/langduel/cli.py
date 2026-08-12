@@ -248,6 +248,11 @@ class App:
             return 0
         first = q.origin_key not in self.p.discovered
         if not first and not force:
+            # Already collected: recall it in one line rather than going silent.
+            # The full card only lands once, but the etymology should stay
+            # visible every time the word comes round — that is the point of it.
+            self.body.append(f"  {violet(q.origin_key)} {dim('<')} "
+                             + dim(clip(o.root, ui.width() - len(q.origin_key) - 8)))
             return 0
         w = ui.width()
         rows = wrap(o.root, w - 8)
