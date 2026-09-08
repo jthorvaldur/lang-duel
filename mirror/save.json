@@ -1,10 +1,10 @@
 {
-  "wins": 17,
-  "losses": 10,
+  "wins": 19,
+  "losses": 11,
   "close_calls": 3,
   "streak": 0,
   "best_streak": 4,
-  "xp": 264,
+  "xp": 295,
   "ladder_progress": 2,
   "started": 1786575134.112787,
   "items": {
@@ -217,15 +217,36 @@
       "miss": 1,
       "box": 0,
       "due": 1786576048.708701
+    },
+    "w:yesterday": {
+      "en": 1,
+      "es": 0,
+      "miss": 0,
+      "box": 1,
+      "due": 1786853610.974036
+    },
+    "n:sesenta y cinco": {
+      "en": 1,
+      "es": 0,
+      "miss": 0,
+      "box": 1,
+      "due": 1786853631.8830159
+    },
+    "v:hablar:preterite:5": {
+      "en": 0,
+      "es": 0,
+      "miss": 1,
+      "box": 0,
+      "due": 1786853664.2994912
     }
   },
   "lang_record": {
     "en": [
-      11,
-      8
+      13,
+      10
     ],
     "es": [
-      19,
+      20,
       9
     ]
   }
