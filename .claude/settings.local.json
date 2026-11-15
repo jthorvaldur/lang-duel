@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(chmod +x play)",
+      "Bash(./play --rounds 6 --seed 7 --profile /tmp/claude-502/-Users-jthor-GitHub-language/f9aa239c-c1c4-4a83-bf78-586b3f892a95/scratchpad/p.json)"
+    ]
+  }
+}
